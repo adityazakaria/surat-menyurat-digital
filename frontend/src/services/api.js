@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://surat-menyurat-digital-x56o.vercel.app",
+  baseURL:
+    "https://surat-menyurat-digital-3yw6-6t3v8rnga-adityaz-s-projects.vercel.app",
 });
 
 api.interceptors.request.use((config) => {
