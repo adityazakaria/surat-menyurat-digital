@@ -7,7 +7,8 @@
     "start": "node src/index.js",
     "prisma:migrate": "npx prisma migrate dev --name init",
     "prisma:generate": "npx prisma generate",
-    "seed": "node seed.js"
+    "seed": "node seed.js",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@hono/node-server": "^2.0.4",

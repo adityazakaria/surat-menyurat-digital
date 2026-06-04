@@ -31,6 +31,7 @@ app.use("/*", cors());
 
 // Public
 app.post("/api/auth/login", login);
+app.get("/", (c) => c.text("API OK"));
 
 // Protected
 app.use("/api/*", authenticate);
