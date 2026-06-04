@@ -1,6 +1,8 @@
+import "dotenv/config";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { handle } from "hono/vercel";
+import { serve } from "@hono/node-server";
 
 import { authenticate, authorize } from "./middleware/auth.js";
 import { login } from "./controllers/authController.js";
@@ -38,17 +40,22 @@ const app = new Hono();
 app.use(
   "*",
   cors({
-    origin: "https://tampilanweb-delta.vercel.app",
+    origin: (origin) => {
+      if (!origin) return "https://tampilanweb-delta.vercel.app";
+      if (
+        origin.startsWith("http://localhost:") ||
+        origin.endsWith(".vercel.app") ||
+        origin === "https://tampilanweb-delta.vercel.app"
+      ) {
+        return origin;
+      }
+      return "https://tampilanweb-delta.vercel.app";
+    },
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   }),
 );
-
-// Handle preflight request
-app.options("*", (c) => {
-  return c.body(null, 204);
-});
 
 // ======================
 // TEST ROUTE
@@ -119,6 +126,18 @@ app.get(
   authorize("admin", "pimpinan", "staff"),
   exportLaporanPDF,
 );
+
+// ======================
+// LOCAL NODE SERVER LISTENER
+// ======================
+if (!process.env.VERCEL) {
+  const port = process.env.PORT || 3000;
+  console.log(`Server is running on port ${port}`);
+  serve({
+    fetch: app.fetch,
+    port: Number(port),
+  });
+}
 
 // ======================
 // EXPORT FOR VERCEL
