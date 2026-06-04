@@ -51,16 +51,19 @@ app.options("*", (c) => {
 });
 
 // ======================
-// PUBLIC ROUTES
+// TEST ROUTE
 // ======================
 app.get("/", (c) => {
   return c.text("API OK");
 });
 
+// ======================
+// PUBLIC ROUTES
+// ======================
 app.post("/api/auth/login", login);
 
 // ======================
-// PROTECTED ROUTES
+// AUTH MIDDLEWARE
 // ======================
 app.use("/api/users/*", authenticate);
 app.use("/api/surat/*", authenticate);
@@ -118,6 +121,6 @@ app.get(
 );
 
 // ======================
-// START SERVER
+// EXPORT FOR VERCEL
 // ======================
 export default handle(app);
