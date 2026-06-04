@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { serve } from "@hono/node-server";
+import { handle } from "hono/vercel";
 
 import { authenticate, authorize } from "./middleware/auth.js";
 import { login } from "./controllers/authController.js";
@@ -81,6 +81,7 @@ app.delete("/api/users/:id", authorize("admin"), deleteUser);
 // ======================
 app.get("/api/surat", getSuratList);
 app.get("/api/surat/:id", getSuratById);
+
 app.post("/api/surat", authorize("staff", "admin"), createSurat);
 
 app.put(
@@ -108,7 +109,7 @@ app.put("/api/disposisi/:id/selesai", authorize("staff"), selesaikanDisposisi);
 app.get("/api/dashboard", getDashboardStats);
 
 // ======================
-// LAPORAN
+// LAPORAN PDF
 // ======================
 app.get(
   "/api/laporan/pdf",
@@ -119,16 +120,4 @@ app.get(
 // ======================
 // START SERVER
 // ======================
-const port = parseInt(process.env.PORT) || 5000;
-
-serve(
-  {
-    fetch: app.fetch,
-    port,
-  },
-  (info) => {
-    console.log(`Server running at http://localhost:${info.port}`);
-  },
-);
-
-export default app;
+export default handle(app);
