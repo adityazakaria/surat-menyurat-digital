@@ -4,7 +4,56 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("postgresql://neondb_owner:npg_lCX9nzTwJv1x@ep-calm-dew-aognafwp.c-2.ap-southeast-1.aws.neon.tech/suray-menyurat?sslmode=require")
+}
+
+model User {
+  id            Int         @id @default(autoincrement())
+  nama          String
+  email         String      @unique
+  password      String
+  role          Role
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  disposisiDari Disposisi[] @relation("DariUser")
+  disposisiKe   Disposisi[] @relation("KeUser")
+  suratDibuat   Surat[]     @relation("UserSurat")
+
+  @@map("users")
+}
+
+model Surat {
+  id             Int         @id @default(autoincrement())
+  nomorSurat     String      @map("nomor_surat")
+  jenis          JenisSurat
+  tanggalSurat   DateTime    @map("tanggal_surat")
+  pengirimTujuan String      @map("pengirim_tujuan")
+  perihal        String
+  fileUrl        String?     @map("file_url")
+  status         StatusSurat @default(draft)
+  userId         Int         @map("user_id")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+  disposisi      Disposisi[]
+  user           User        @relation("UserSurat", fields: [userId], references: [id])
+
+  @@map("surat")
+}
+
+model Disposisi {
+  id           Int             @id @default(autoincrement())
+  suratId      Int             @map("surat_id")
+  dariUserId   Int             @map("dari_user_id")
+  kepadaUserId Int             @map("kepada_user_id")
+  instruksi    String
+  batasWaktu   DateTime        @map("batas_waktu")
+  status       StatusDisposisi @default(pending)
+  createdAt    DateTime        @default(now()) @map("created_at")
+  dariUser     User            @relation("DariUser", fields: [dariUserId], references: [id])
+  kepadaUser   User            @relation("KeUser", fields: [kepadaUserId], references: [id])
+  surat        Surat           @relation(fields: [suratId], references: [id])
+
+  @@map("disposisi")
 }
 
 enum Role {
@@ -28,56 +77,4 @@ enum StatusSurat {
 enum StatusDisposisi {
   pending
   completed
-}
-
-model User {
-  id        Int      @id @default(autoincrement())
-  nama      String
-  email     String   @unique
-  password  String
-  role      Role
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  suratDibuat   Surat[]     @relation("UserSurat")
-  disposisiDari Disposisi[] @relation("DariUser")
-  disposisiKe   Disposisi[] @relation("KeUser")
-
-  @@map("users")
-}
-
-model Surat {
-  id            Int         @id @default(autoincrement())
-  nomorSurat    String      @map("nomor_surat")
-  jenis         JenisSurat
-  tanggalSurat  DateTime    @map("tanggal_surat")
-  pengirimTujuan String     @map("pengirim_tujuan")
-  perihal       String
-  fileUrl       String?     @map("file_url")
-  status        StatusSurat @default(draft)
-  userId        Int         @map("user_id")
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
-
-  user        User         @relation("UserSurat", fields: [userId], references: [id])
-  disposisi   Disposisi[]
-
-  @@map("surat")
-}
-
-model Disposisi {
-  id           Int            @id @default(autoincrement())
-  suratId      Int            @map("surat_id")
-  dariUserId   Int            @map("dari_user_id")
-  kepadaUserId Int            @map("kepada_user_id")
-  instruksi    String
-  batasWaktu   DateTime       @map("batas_waktu")
-  status       StatusDisposisi @default(pending)
-  createdAt    DateTime       @default(now()) @map("created_at")
-
-  surat      Surat @relation(fields: [suratId], references: [id])
-  dariUser   User  @relation("DariUser", fields: [dariUserId], references: [id])
-  kepadaUser User  @relation("KeUser", fields: [kepadaUserId], references: [id])
-
-  @@map("disposisi")
 }
